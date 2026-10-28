@@ -1,51 +1,48 @@
-
 # Predixion AI Research Agent
 
-A production-oriented AI research agent built for the Predixion AI Platform Engineering Internship assignment.
+A production-oriented AI research agent that plans research tasks, uses external tools, filters retrieved evidence, and produces structured, source-backed answers.
 
-## Objective
+## Project Status
 
-Build an agent that plans research tasks, selects tools, retrieves and filters evidence, and produces structured, source-backed answers.
+Initial project setup completed. Agent implementation and evaluation are in progress.
 
 ## Planned Architecture
 
 1. Accept a research question.
 2. Generate a structured research plan.
-3. Orchestrate web search and webpage retrieval.
-4. Filter irrelevant, duplicate, and low-quality evidence.
-5. Synthesize an answer grounded in retrieved evidence.
-6. Validate the final response schema.
-7. Report confidence, assumptions, limitations, and next steps.
+3. Select and execute research tools.
+4. Retrieve and filter evidence.
+5. Synthesize a structured answer with sources.
+6. Validate the response and report limitations.
 
 ## Technology Stack
 
-- Python
-- OpenAI API
-- Tavily Search
+- Python 3.12
+- OpenAI Python SDK
+- Tavily Search API
 - Pydantic
-- Requests and BeautifulSoup
+- Requests and Beautiful Soup
 - Pytest
-
-## Project Structure
-
-- `app/` - Agent orchestration and application logic
-- `app/tools/` - Research tools
-- `tests/` - Automated tests
-- `evaluation/` - Evaluation queries and results
-- `sample_outputs/` - Sample reports
 
 ## Setup
 
-Setup instructions will be finalized after implementation and testing.
+1. Create and activate a Python virtual environment.
+2. Install dependencies with `python -m pip install -r requirements.txt`.
+3. Configure API keys in a local `.env` file.
+4. Run the application using the instructions added as implementation progresses.
+
+## Reliability and Safety
+
+The planned system will include bounded tool execution, error handling, evidence filtering, structured output validation, and safeguards against prompt injection.
 
 ## Evaluation
 
-The evaluation will cover at least five research queries, including successful cases and failure or edge cases.
+At least five research and failure-case queries will be evaluated. Results will be documented after tests have actually been run.
 
-## Limitations
+## Known Limitations
 
-To be documented after implementation and testing.
+Implementation, evaluation results, and production-readiness status will be documented as the project develops.
 
 ## Future Improvements
 
-Potential improvements include caching, asynchronous tool execution, and a separate evaluation or judge step.
+Potential improvements include caching, an evaluator step, asynchronous tool execution, and comparison with a non-agentic baseline.
