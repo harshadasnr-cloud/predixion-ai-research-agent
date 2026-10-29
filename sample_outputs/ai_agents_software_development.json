@@ -1,0 +1,29 @@
+{
+  "user_question": "How are AI agents being used in software development?",
+  "short_answer": "Based on the provided evidence, there are no specific details regarding how AI agents are used in software development, though the text notes that Gartner predicts 33% of enterprise software applications will include agentic AI by 2028.",
+  "key_findings": [
+    {
+      "finding": "Gartner predicts that 33% of enterprise software applications will include agentic AI by 2028, up from 1% in 2024.",
+      "source_urls": [
+        "https://www.workday.com/en-us/perspectives/ai/top-ai-agent-examples-and-use-cases.html"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "Top AI Agent Examples and Industry Use Cases | Workday US",
+      "url": "https://www.workday.com/en-us/perspectives/ai/top-ai-agent-examples-and-use-cases.html",
+      "summary": "An article discussing AI agent definitions, types, and use cases across industries such as HR, finance, healthcare, and higher education.",
+      "source_type": "research"
+    }
+  ],
+  "confidence_level": "medium",
+  "limitations_or_assumptions": [
+    "The provided evidence focuses on general enterprise operations, HR, finance, healthcare, and higher education, but lacks specific details on software engineering use cases, tools, frameworks, or developer productivity impacts.",
+    "Some research steps failed; the collected evidence may be incomplete."
+  ],
+  "suggested_next_steps": [
+    "Consult software-specific industry reports or technical documentation covering AI coding assistants and frameworks.",
+    "Search for evidence addressing security and maintenance challenges unique to deploying AI agents in development teams."
+  ]
+}
