@@ -1,8 +1,7 @@
-
-openai
 tavily-python
 pydantic
 python-dotenv
 requests
 beautifulsoup4
 pytest
+google-genai

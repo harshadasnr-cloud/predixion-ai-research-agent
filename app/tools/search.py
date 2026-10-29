@@ -1,15 +1,19 @@
 
+import logging
 import os
 
 from dotenv import load_dotenv
 from tavily import TavilyClient
 
-
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+
+SEARCH_TIMEOUT_SECONDS = 10
 
 
 def search_web(query: str, max_results: int = 5) -> list[dict]:
-    """Search the web and return normalized, bounded results."""
+    """Search the web with bounded results and safe error handling."""
 
     query = query.strip()
 
@@ -25,17 +29,24 @@ def search_web(query: str, max_results: int = 5) -> list[dict]:
             "TAVILY_API_KEY is missing. Add it to your local .env file."
         )
 
-    client = TavilyClient(api_key=api_key)
-
     try:
+        logger.info("Searching the web (timeout target: %s seconds).",
+                    SEARCH_TIMEOUT_SECONDS)
+
+        # TavilyClient uses httpx internally. Configure the HTTP timeout
+        # through its underlying client if supported by the installed SDK.
+        client = TavilyClient(api_key=api_key)
+
         response = client.search(
             query=query,
             max_results=max_results,
             search_depth="basic",
             include_answer=False,
+            timeout=SEARCH_TIMEOUT_SECONDS,
         )
+
     except Exception as exc:
-        # Avoid exposing credentials or provider response details.
+        logger.warning("Web search failed (%s).", type(exc).__name__)
         raise RuntimeError(
             "Web search failed. Check your API key, connection, "
             "and Tavily usage limits."
@@ -73,4 +84,5 @@ def search_web(query: str, max_results: int = 5) -> list[dict]:
             }
         )
 
+    logger.info("Web search returned %s usable results.", len(normalized))
     return normalized

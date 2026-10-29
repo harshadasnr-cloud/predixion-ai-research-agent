@@ -1,0 +1,43 @@
+{
+  "user_question": "What are the latest applications of AI agents in healthcare?",
+  "short_answer": "AI agents in healthcare are increasingly utilized for diagnostic support, workflow and operational automation, multi-departmental clinical diagnostics, and patient interaction. However, current research relies heavily on simulated environments and laboratory studies rather than real-world clinical deployments.",
+  "key_findings": [
+    {
+      "finding": "AI systems in healthcare are categorized into conversational agents, workflow/automation assistants, and multimodal decision support agents, utilizing external tool use (such as retrieval-augmented generation) and iterative self-correction mechanisms.",
+      "source_urls": [
+        "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0342182"
+      ]
+    },
+    {
+      "finding": "Recent frameworks like coordinated multi-agent systems in healthcare (MASH) and agent hospitals aim to optimize clinical and operational workflows, though evaluations remain predominantly simulated or laboratory-based with limited real-world clinical pilots.",
+      "source_urls": [
+        "https://www.nature.com/articles/s44387-026-00076-4",
+        "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0342182"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "AI agent in healthcare: applications, evaluations, and future directions | npj Artificial Intelligence",
+      "url": "https://www.nature.com/articles/s44387-026-00076-4",
+      "summary": "Discusses AI agent applications in healthcare including agent hospitals, multi-specialist consultations, and coordinated multi-agent systems, while noting risks like hallucination and limited generalizability.",
+      "source_type": "research"
+    },
+    {
+      "title": "Artificial intelligence agents in healthcare research: A scoping review | PLOS One",
+      "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0342182",
+      "summary": "A scoping review analyzing 43 studies on healthcare AI agents, categorizing them into conversational, workflow/automation, and multimodal decision support systems, and highlighting a heavy reliance on simulated evaluations.",
+      "source_type": "research"
+    }
+  ],
+  "confidence_level": "medium",
+  "limitations_or_assumptions": [
+    "The available literature heavily favors simulated evaluations and laboratory studies over real-world clinical trials.",
+    "Clinical outcomes and safety endpoints are rarely addressed in the current body of research.",
+    "Some research steps failed; the collected evidence may be incomplete."
+  ],
+  "suggested_next_steps": [
+    "Prioritize conducting rigorous clinical trials to assess the long-term clinical efficacy and safety of AI agents.",
+    "Develop standardized governance frameworks and evaluation metrics for real-world healthcare deployments."
+  ]
+}

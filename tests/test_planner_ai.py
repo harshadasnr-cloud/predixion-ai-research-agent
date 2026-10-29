@@ -4,8 +4,8 @@ import json
 from app import planner
 
 
-def test_missing_openai_key_uses_fallback(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+def test_missing_gemini_key_uses_fallback(monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
     plan = planner.create_research_plan("How does RAG work?")
 
@@ -13,10 +13,10 @@ def test_missing_openai_key_uses_fallback(monkeypatch):
     assert plan.question == "How does RAG work?"
 
 
-def test_openai_plan_is_validated(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+def test_gemini_plan_is_validated(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
 
-    response_payload = {
+    payload = {
         "question": "How does RAG work?",
         "sub_questions": ["How does retrieval support generation?"],
         "steps": [
@@ -28,34 +28,24 @@ def test_openai_plan_is_validated(monkeypatch):
             {
                 "task": "Inspect a relevant source",
                 "tool": "web_fetch",
-                "purpose": "Review source details and supporting evidence",
+                "purpose": "Review supporting evidence",
             },
         ],
     }
 
-    class FakeMessage:
-        content = json.dumps(response_payload)
-
-    class FakeChoice:
-        message = FakeMessage()
-
     class FakeResponse:
-        choices = [FakeChoice()]
+        text = json.dumps(payload)
 
-    class FakeCompletions:
-        def create(self, **kwargs):
-            assert kwargs["response_format"] == {"type": "json_object"}
+    class FakeModels:
+        def generate_content(self, **kwargs):
+            assert kwargs["config"]["response_mime_type"] == "application/json"
             return FakeResponse()
 
     class FakeClient:
         def __init__(self, **kwargs):
-            self.chat = type(
-                "Chat",
-                (),
-                {"completions": FakeCompletions()},
-            )()
+            self.models = FakeModels()
 
-    monkeypatch.setattr(planner, "OpenAI", FakeClient)
+    monkeypatch.setattr(planner.genai, "Client", FakeClient)
 
     plan = planner.create_research_plan("How does RAG work?")
 
@@ -67,31 +57,21 @@ def test_openai_plan_is_validated(monkeypatch):
     }
 
 
-def test_invalid_model_output_uses_fallback(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-
-    class FakeMessage:
-        content = '{"question":"test","sub_questions":[],"steps":[]}'
-
-    class FakeChoice:
-        message = FakeMessage()
+def test_invalid_gemini_output_uses_fallback(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
 
     class FakeResponse:
-        choices = [FakeChoice()]
+        text = '{"question":"test","sub_questions":[],"steps":[]}'
 
-    class FakeCompletions:
-        def create(self, **kwargs):
+    class FakeModels:
+        def generate_content(self, **kwargs):
             return FakeResponse()
 
     class FakeClient:
         def __init__(self, **kwargs):
-            self.chat = type(
-                "Chat",
-                (),
-                {"completions": FakeCompletions()},
-            )()
+            self.models = FakeModels()
 
-    monkeypatch.setattr(planner, "OpenAI", FakeClient)
+    monkeypatch.setattr(planner.genai, "Client", FakeClient)
 
     plan = planner.create_research_plan("Explain AI research agents")
 
