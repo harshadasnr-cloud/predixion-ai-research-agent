@@ -138,3 +138,21 @@ def test_evidence_pack_has_per_source_budget():
     pack = agent.build_evidence_pack(ranked)
     assert len(pack) == 4
     assert all(len(p["content"]) <= 3000 for p in pack)
+
+
+def test_question_names_missing_from_sources_forces_low_confidence(setup):
+    q = "Research the quarterly revenue of Zzyzx Quantum Llamas Incorporated"
+    urls = [f"https://site{i}.com/p" for i in range(3)]
+    setup.setattr(agent, "search_web", lambda *a, **k: [
+        {"title": "Quantum Computing Inc. results", "url": u,
+         "content": "Quantum Computing Inc. revenue was 3.7 million.", "score": 0.9}
+        for u in urls])
+    payload = good_payload(
+        short_answer="The evidence has no information about that company.",
+        key_findings=[{"finding": "No mention of the company.", "source_urls": urls}],
+        sources=[{"url": u, "summary": "s"} for u in urls])
+    fake_gemini(setup, agent, [payload])
+    report = agent.run_research(q)
+    assert report.metadata.used_fallback is False
+    assert report.confidence_level == "low"
+    assert any("Zzyzx" in l for l in report.limitations_or_assumptions)

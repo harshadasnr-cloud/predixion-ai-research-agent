@@ -1,4 +1,5 @@
 """Source quality: classify, score, filter, and cap confidence in code."""
+import re
 from urllib.parse import urlparse
 
 from app import config
@@ -79,11 +80,37 @@ def assess_evidence(items: list[dict]) -> tuple[bool, str]:
     return False, ""
 
 
+_SKIP_TERMS = {"Compare", "Find", "Research", "What", "Which", "Explain", "Describe",
+               "Summarize", "Analyze", "Tell", "Give", "List", "Show", "Identify",
+               "Evaluate", "The", "And", "For", "With", "From", "Into", "About", "Based"}
+MIN_ENTITY_COVERAGE = 0.6
+
+
+def entity_coverage(question: str, texts: list[str]) -> tuple[float, list[str]]:
+    """Do the question's key names (Title-case words) appear in the evidence?
+
+    Returns (coverage 0..1, missing terms). No names in the question -> (1.0, []).
+    Catches questions about things the sources are not actually about.
+    """
+    words = re.findall(r"[A-Za-z][A-Za-z0-9'-]*", question)
+    terms: list[str] = []
+    for w in words[1:]:  # skip the first word, it is capitalised anyway
+        if (len(w) >= 4 and w[0].isupper() and any(c.islower() for c in w)
+                and w not in _SKIP_TERMS and w.lower() not in {t.lower() for t in terms}):
+            terms.append(w)
+    if not terms:
+        return 1.0, []
+    blob = " ".join(texts).lower()
+    missing = [t for t in terms if t.lower() not in blob]
+    return (len(terms) - len(missing)) / len(terms), missing
+
+
 def compute_confidence(llm_level: str, independent_domains: int, fetches_ok: int,
-                       tool_errors: int, used_fallback: bool) -> str:
+                       tool_errors: int, used_fallback: bool,
+                       entity_cov: float = 1.0) -> str:
     """Final confidence = min(LLM's claim, evidence-based cap)."""
     cap = _LEVEL["high"]
-    if used_fallback or independent_domains < 2:
+    if used_fallback or independent_domains < 2 or entity_cov < MIN_ENTITY_COVERAGE:
         cap = _LEVEL["low"]
     elif independent_domains < 3 or fetches_ok == 0 or tool_errors > 0:
         cap = _LEVEL["medium"]

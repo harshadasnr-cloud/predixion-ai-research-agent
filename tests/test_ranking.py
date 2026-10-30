@@ -1,5 +1,5 @@
 from app.ranking import (assess_evidence, classify_source, compute_confidence,
-                         rank_and_filter)
+                         entity_coverage, rank_and_filter)
 
 
 def item(url, score):
@@ -43,3 +43,20 @@ def test_confidence_caps():
     assert compute_confidence("high", 1, 2, 0, False) == "low"
     assert compute_confidence("high", 4, 2, 0, True) == "low"
     assert compute_confidence("low", 4, 2, 0, False) == "low"
+
+
+def test_entity_coverage_detects_unrelated_sources():
+    q = "Research the quarterly revenue of Zzyzx Quantum Llamas Incorporated"
+    cov, missing = entity_coverage(q, ["Quantum Computing Inc. reports revenue"])
+    assert cov < 0.6 and "Zzyzx" in missing and "Llamas" in missing
+
+
+def test_entity_coverage_ok_when_names_present_or_absent():
+    assert entity_coverage("Compare Pinecone and Qdrant", ["pinecone vs qdrant"])[0] == 1.0
+    assert entity_coverage("What is RAG?", ["anything"]) == (1.0, [])
+    assert entity_coverage("Research the pros and cons of agents", ["x"]) == (1.0, [])
+
+
+def test_low_entity_coverage_caps_confidence():
+    assert compute_confidence("high", 4, 2, 0, False, entity_cov=0.25) == "low"
+    assert compute_confidence("high", 4, 2, 0, False, entity_cov=1.0) == "high"

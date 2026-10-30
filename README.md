@@ -4,9 +4,10 @@ A production-oriented AI research agent. It plans a research task, searches the 
 reads pages, and returns a validated JSON report with source citations, confidence, limitations, and next steps.
 
 ## Project Status
-- 49 automated tests passing (all run offline with mocks)
+- 53 automated tests passing (all run offline with mocks)
 - Evaluation suite of 7 queries (happy path, edge, adversarial): see `evaluation/evaluation_report.md`
 - Sample outputs in `sample_outputs/`
+- Simple Streamlit web UI plus a command-line interface
 
 ## Features
 - **Planning:** Gemini creates a structured plan (one search per entity, fetch only when needed); deterministic fallback plan if it fails.
@@ -14,7 +15,7 @@ reads pages, and returns a validated JSON report with source citations, confiden
 - **Source filtering:** Tavily relevance score x domain quality, low-score removal, per-domain cap, `source_type` derived in code.
 - **Parallel execution:** searches and page fetches run concurrently.
 - **Grounded synthesis:** schema-constrained Gemini output; every claim must cite a retrieved URL; unsupported citations are removed.
-- **Rule-based confidence cap:** final confidence is the lower of the LLM's claim and an evidence-based rule.
+- **Rule-based confidence cap:** final confidence is the lower of the LLM's claim and evidence-based rules (independent domains, tool errors, fallback, and whether the question's key names appear in the sources).
 - **Failure handling:** retries with backoff (429/5xx/timeouts only), corrective retry on malformed JSON, labelled low-confidence fallback report.
 - **Safety:** SSRF-hardened fetcher, injection screening of retrieved text, retrieved content treated as untrusted data.
 - **Observability:** per-run trace (step timings, tokens, tool errors) written to `logs/traces.jsonl` and summarized in `metadata`.
@@ -32,7 +33,7 @@ User question
    -> Synthesis (Gemini, schema-constrained, 1 corrective retry)
         -> on failure: labelled fallback report
    -> Grounding (drop claims citing URLs not in evidence; build sources in code)
-   -> Confidence cap (rules)
+   -> Confidence cap (rules: domains, tool errors, fallback, entity coverage)
    -> ResearchReport + metadata (+ JSONL trace)
 ```
 
@@ -54,7 +55,7 @@ predixion-ai-research-agent/
 │       └── fetch.py   safe page fetch
 ├── streamlit_app.py   web UI (Streamlit)
 ├── .streamlit/config.toml
-├── tests/             49 tests
+├── tests/             53 tests
 ├── evaluation/        queries.json, run_eval.py, baseline.py, evaluation_report.md
 ├── sample_outputs/
 ├── check_connections.py / check_gemini.py
@@ -90,7 +91,7 @@ python -m evaluation.baseline "Compare the top 3 open-source vector databases fo
 A simple Streamlit front end calls the same agent code.
 ```powershell
 python -m pip install -r requirements.txt
-python -m streamlit run streamlit_app.py.
+python -m streamlit run streamlit_app.py
 ```
 Open http://localhost:8501, type a question (or click an example), and press **Run research**.
 The page shows live progress, the short answer, confidence, cited findings, sources, limitations, next steps,
@@ -121,7 +122,8 @@ or heavy framework, because the task does not need one and a simple loop is easi
 ## How hallucinations are reduced
 Evidence-only prompt, temperature 0, schema-constrained output, mandatory citations, citations checked against retrieved URLs
 (unsupported ones removed and reported), sources and `source_type` built in code, `user_question` never taken from the LLM,
-and confidence capped by rules (for example fewer than 2 independent domains forces low).
+and confidence capped by rules. For example, fewer than 2 independent domains forces low, and so does a question whose key
+names (such as a company name) do not appear in any retrieved source.
 
 ## Prompt injection
 Retrieved text is passed as data with an explicit instruction not to follow it. Instruction-like patterns are stripped before the
@@ -150,10 +152,12 @@ See `evaluation/evaluation_report.md` for 7 queries with expected vs observed be
 ## Known Limitations
 - Citation validation checks that a URL was retrieved, not that it semantically supports the claim.
 - Search quality depends on Tavily; some sites block fetching; PDFs and JavaScript pages are not read.
-- Fallback reports show raw snippets and can include text about unrelated entities (observed in Q5: figures for similarly named companies).
+- Fallback reports show raw snippets and can include text about unrelated entities (observed in Q5: figures for similarly named companies); low confidence and a limitation flag this.
 - "Top N" requests can still return a different count if the model lists extras (seen once, fixed by a prompt rule).
 - Confidence rules are heuristic.
 - Regex injection screening is easy to evade.
+- The entity-coverage rule only works for questions containing proper names.
+- It can mark a real topic low if the sources spell the name differently.
 
 ## Future Improvements
 Claim-to-source entailment checks; LLM-as-judge; shared cache; async API; PDF support; larger evaluation set; baseline comparison at scale.

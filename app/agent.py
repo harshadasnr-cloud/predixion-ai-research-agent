@@ -13,8 +13,8 @@ from google.genai import types
 from app import config
 from app.models import LLMReport, ResearchReport, RunMetadata
 from app.planner import ResearchPlan, create_research_plan
-from app.ranking import (assess_evidence, classify_source, compute_confidence,
-                         domain_of, rank_and_filter)
+from app.ranking import (MIN_ENTITY_COVERAGE, assess_evidence, classify_source,
+                         compute_confidence, domain_of, entity_coverage, rank_and_filter)
 from app.retry import call_with_retry
 from app.safety import neutralize
 from app.tools.fetch import fetch_webpage
@@ -326,9 +326,15 @@ def run_research(question: str) -> ResearchReport:
 
         # Confidence is capped by evidence quality, not just the LLM's opinion.
         domains = {domain_of(str(s.url)) for s in report.sources}
+        coverage, missing = entity_coverage(
+            question, [f"{p['title']} {p['content']}" for p in pack])
         report.confidence_level = compute_confidence(
             report.confidence_level, len(domains), trace.counters["fetch_ok"],
-            len(errors), used_fallback)
+            len(errors), used_fallback, coverage)
+        if coverage < MIN_ENTITY_COVERAGE:
+            report.limitations_or_assumptions.append(
+                "Key terms from your question do not appear in the retrieved sources "
+                f"({', '.join(missing)}). The sources may be about something else.")
         if errors and not any("research steps failed" in l.lower()
                               for l in report.limitations_or_assumptions):
             report.limitations_or_assumptions.append(
