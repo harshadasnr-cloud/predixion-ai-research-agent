@@ -42,10 +42,18 @@ Schema validity, every finding cited, independent domains, keyword coverage, fal
 Search down, Gemini error or timeout, malformed JSON (retry then fallback), hallucinated citation (dropped), injected text in a search result (neutralized), fetch failure (snippet used), SSRF addresses rejected, PDF skipped, oversized download capped, redirect loop rejected, vague question rejected, key question terms missing from sources (low confidence).
 
 ## Agent vs non-agentic baseline
-Run `python -m evaluation.baseline "Compare the top 3 open-source vector databases for RAG"`, then fill in:
-- Did the baseline give URLs? Open two: do they exist?
-- Did it state uncertainty or a confidence level?
-- Agent advantage: every claim traceable to a retrieved page. Baseline cost: about 1 call and no search latency.
+Same question ("Compare the top 3 open-source vector databases for RAG"), same Gemini model, no tools.
 
+| Aspect | Baseline (no tools) | Agent |
+|---|---|---|
+| Latency | 2.7s | about 15s |
+| Cost | 1 LLM call | 2-4 searches, page fetches, 1-2 LLM calls (about 4,600 tokens) |
+| Databases named | Milvus, Qdrant, Chroma | Chroma, Milvus, Qdrant |
+| Sources | Generic names only ("DB-Engines rankings", "official documentation", "VectorDB Bench"); no URLs, nothing checkable | Real URLs retrieved in this run; every finding links to 2-3 of them; citations checked in code |
+| Freshness | States "as of 2024" (training-data knowledge) | Sources retrieved at run time |
+| Confidence | "5/5" with no evidence behind it | Rule-capped by domains, tool errors and entity coverage |
+| Limitations stated | None | Reported in every run |
+
+Conclusion: for a well-known topic the baseline produced a plausible, similar answer in a fraction of the time, so an agent is not always necessary. The agent's advantage is verifiability, current information and calibrated uncertainty, which matter when the answer drives a decision. The baseline's weakness is that its confidence and sources cannot be trusted or checked. A fairer comparison would use the harder queries (Q2 and Q5) where the model's memory is likely to be wrong.
 ## Limits of this evaluation
 Only 7 queries; relevance judged by keyword proxy plus manual reading; no semantic claim-vs-source check; live search results change between runs.
