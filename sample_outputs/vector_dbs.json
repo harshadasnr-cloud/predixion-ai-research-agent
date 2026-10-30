@@ -1,0 +1,72 @@
+{
+  "user_question": "Compare the top 3 open-source vector databases for RAG",
+  "short_answer": "Based on the evidence, Milvus, Qdrant, Chroma, and Weaviate are among the top open-source options for RAG, each tailored to different workloads, scales, and complexities.",
+  "key_findings": [
+    {
+      "finding": "Milvus is a widely adopted open-source vector database designed for massive scale, billion-scale indexing, and high-throughput workloads, making it ideal for large and growing enterprise systems.",
+      "source_urls": [
+        "https://agixtech.com/insights/chroma-vs-milvus-vs-qdrant-vector-db-comparison",
+        "https://iternal.ai/insights/best-vector-databases-2026"
+      ]
+    },
+    {
+      "finding": "Qdrant is an open-source Rust-based vector database that offers high retrieval performance, efficient quantization for cost-sensitive workloads, and rich JSON-based payload filtering.",
+      "source_urls": [
+        "https://iternal.ai/insights/best-vector-databases-2026",
+        "https://www.zenml.io/blog/vector-databases-for-rag"
+      ]
+    },
+    {
+      "finding": "Chroma is positioned as a practical, lightweight, and developer-centric choice that shines in local development, early RAG experiments, and prototyping.",
+      "source_urls": [
+        "https://pecollective.com/tools/best-vector-databases",
+        "https://iternal.ai/insights/best-vector-databases-2026"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "Chroma vs Milvus vs Qdrant Vector DB Compared | Agix Technologies",
+      "url": "https://agixtech.com/insights/chroma-vs-milvus-vs-qdrant-vector-db-comparison",
+      "summary": "Compares Chroma, Milvus, and Qdrant in security, scalability, setup, and performance benchmarks.",
+      "source_type": "other"
+    },
+    {
+      "title": "Best Vector Databases 2026: Pinecone vs Weaviate vs Milvus",
+      "url": "https://iternal.ai/insights/best-vector-databases-2026",
+      "summary": "Evaluates vector databases for RAG in 2026, noting Milvus's large community, Qdrant's cost efficiency, and Chroma's simplicity for local development.",
+      "source_type": "other"
+    },
+    {
+      "title": "We Tried and Tested 10 Best Vector Databases for RAG Pipelines - ZenML Blog",
+      "url": "https://www.zenml.io/blog/vector-databases-for-rag",
+      "summary": "Analyzes vector databases for RAG pipelines, highlighting Qdrant's Rust speed with payload filtering and Milvus's GPU acceleration.",
+      "source_type": "other"
+    },
+    {
+      "title": "Vector Database Comparison: Best Picks by Use Case",
+      "url": "https://pecollective.com/tools/best-vector-databases",
+      "summary": "Compares vector databases by use case, highlighting Milvus for large data platforms, Qdrant for performance-sensitive retrieval, and Chroma for early RAG work.",
+      "source_type": "other"
+    }
+  ],
+  "confidence_level": "medium",
+  "limitations_or_assumptions": [
+    "Some research steps failed; the collected evidence may be incomplete."
+  ],
+  "suggested_next_steps": [],
+  "metadata": {
+    "run_id": "24084bdc25ff",
+    "planner_mode": "llm",
+    "searches": 2,
+    "fetches_ok": 3,
+    "fetches_failed": 1,
+    "tool_errors": 1,
+    "reformulated": false,
+    "injection_flagged": 0,
+    "used_fallback": false,
+    "latency_s": 19.85,
+    "prompt_tokens": 3076,
+    "output_tokens": 833
+  }
+}

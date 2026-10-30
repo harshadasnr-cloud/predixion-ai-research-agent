@@ -1,231 +1,159 @@
-
 # Predixion AI Research Agent
 
-A production-oriented AI research agent that plans research tasks, searches the web, collects evidence, and generates structured research reports with source citations, confidence levels, limitations, and suggested next steps.
+A production-oriented AI research agent. It plans a research task, searches the web, ranks and filters sources,
+reads pages, and returns a validated JSON report with source citations, confidence, limitations, and next steps.
 
 ## Project Status
-
-**Core implementation completed; automated tests passing.**
-
-- 21 automated tests passing
-- LLM-based research planning using Google Gemini
-- Web search using Tavily
-- Webpage retrieval using Requests and Beautiful Soup
-- Structured report validation using Pydantic
-- Fallback planning and report generation for selected failures
-- Evidence-based citation validation
-- Logging, progress updates, and bounded research execution
-
-Some webpage fetches and external API calls may fail. The agent handles selected failures gracefully and reports limitations when evidence collection is incomplete.
+- 49 automated tests passing (all run offline with mocks)
+- Evaluation suite of 7 queries (happy path, edge, adversarial): see `evaluation/evaluation_report.md`
+- Sample outputs in `sample_outputs/`
 
 ## Features
-
-- **Research planning:** Generates a structured plan from the user's question.
-- **Tool orchestration:** Executes bounded web-search and webpage-fetch operations.
-- **Evidence collection:** Collects and limits retrieved evidence before synthesis.
-- **AI synthesis:** Uses Gemini to generate a structured research report.
-- **Output validation:** Validates report fields and checks that cited URLs belong to collected evidence.
-- **Fallback handling:** Uses a fallback plan when AI planning fails and can produce a clearly labelled, low-confidence report when Gemini synthesis is unavailable.
-- **Safety controls:** Restricts webpage fetching to supported HTTP/HTTPS URLs and treats retrieved webpage content as untrusted data.
-- **Progress logging:** Reports research stages and selected failures.
+- **Planning:** Gemini creates a structured plan (one search per entity, fetch only when needed); deterministic fallback plan if it fails.
+- **Adaptive tool use:** if evidence is weak (fewer than 3 sources or a single domain), the agent runs one reformulated search.
+- **Source filtering:** Tavily relevance score x domain quality, low-score removal, per-domain cap, `source_type` derived in code.
+- **Parallel execution:** searches and page fetches run concurrently.
+- **Grounded synthesis:** schema-constrained Gemini output; every claim must cite a retrieved URL; unsupported citations are removed.
+- **Rule-based confidence cap:** final confidence is the lower of the LLM's claim and an evidence-based rule.
+- **Failure handling:** retries with backoff (429/5xx/timeouts only), corrective retry on malformed JSON, labelled low-confidence fallback report.
+- **Safety:** SSRF-hardened fetcher, injection screening of retrieved text, retrieved content treated as untrusted data.
+- **Observability:** per-run trace (step timings, tokens, tool errors) written to `logs/traces.jsonl` and summarized in `metadata`.
 
 ## Architecture
-
 ```text
-User Research Question
-        |
-        v
-Input Validation
-        |
-        v
-Research Planner (Gemini / Fallback)
-        |
-        v
-Research Orchestrator
-        |
-        +---------------------+
-        |                     |
-        v                     v
-   Tavily Search        Webpage Fetch
-        |                     |
-        +----------+----------+
-                   |
-                   v
-            Evidence Collection
-                   |
-                   v
-           Evidence Size Limits
-                   |
-                   v
-          Gemini Report Synthesis
-                   |
-             +-----+-----+
-             |           |
-             v           v
-       Schema Check   Fallback Report
-             |           |
-             +-----+-----+
-                   |
-                   v
-          Citation Validation
-                   |
-                   v
-          Structured JSON Report
+User question
+   -> Input validation (length, vague-question guard)
+   -> Planner (Gemini structured output / fallback plan)
+   -> web_search x N (parallel, budgeted)
+   -> Evidence check: weak? -> ONE reformulated search        <- adaptive step
+   -> Rank + filter (score x domain quality, per-domain cap)
+   -> web_fetch top-K (parallel, only if planned)
+   -> Evidence pack (fair per-source character budget, snippet first)
+   -> Synthesis (Gemini, schema-constrained, 1 corrective retry)
+        -> on failure: labelled fallback report
+   -> Grounding (drop claims citing URLs not in evidence; build sources in code)
+   -> Confidence cap (rules)
+   -> ResearchReport + metadata (+ JSONL trace)
 ```
 
-## Technology Stack
-
-- Python 3.12
-- Google Gemini API
-- Google GenAI Python SDK
-- Tavily Search API
-- Pydantic
-- Requests
-- Beautiful Soup
-- python-dotenv
-- Pytest
-
 ## Project Structure
-
 ```text
 predixion-ai-research-agent/
 ├── app/
-│   ├── main.py
-│   ├── agent.py
-│   ├── planner.py
-│   ├── models.py
+│   ├── main.py        CLI (JSON on stdout, progress on stderr, --out file)
+│   ├── agent.py       orchestration: gather, pack, synthesize, ground
+│   ├── planner.py     LLM planner + fallback plan
+│   ├── models.py      Pydantic schemas (LLM output + final report)
+│   ├── config.py      all budgets, timeouts, thresholds
+│   ├── ranking.py     source classification, filtering, confidence cap
+│   ├── safety.py      prompt-injection screening
+│   ├── retry.py       exponential backoff for transient errors
+│   ├── trace.py       per-run tracing
 │   └── tools/
-│       ├── search.py
-│       └── fetch.py
-├── tests/
-│   ├── test_agent.py
-│   ├── test_fetch.py
-│   ├── test_models.py
-│   ├── test_planner.py
-│   ├── test_planner_ai.py
-│   └── test_search.py
-├── evaluation/
+│       ├── search.py  Tavily search
+│       └── fetch.py   safe page fetch
+├── streamlit_app.py   web UI (Streamlit)
+├── .streamlit/config.toml
+├── tests/             49 tests
+├── evaluation/        queries.json, run_eval.py, baseline.py, evaluation_report.md
 ├── sample_outputs/
-├── .env.example
-├── .gitignore
-├── requirements.txt
-└── README.md
+├── check_connections.py / check_gemini.py
+├── pytest.ini  requirements.txt  .env.example  README.md
 ```
-
-## Prerequisites
-
-- Python 3.12
-- A Google Gemini API key with access to a supported text-generation model
-- A Tavily API key
-- Internet access
 
 ## Setup
-
-### 1. Clone the repository
-
-```bash
+```powershell
 git clone https://github.com/harshadasnr-cloud/predixion-ai-research-agent.git
 cd predixion-ai-research-agent
-```
-
-### 2. Create and activate a virtual environment
-
-Windows PowerShell:
-
-```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
-
-```powershell
 python -m pip install -r requirements.txt
 ```
-
-### 4. Configure environment variables
-
-Copy `.env.example` to `.env` and fill in your own API keys.
-
+Copy `.env.example` to `.env`:
 ```dotenv
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-flash-lite-latest
 TAVILY_API_KEY=your_tavily_api_key
 ```
+Use a model your account supports. Never commit `.env`.
 
-Use a model supported by your API account. The model shown above was used successfully in the development environment; availability may vary.
-
-**Security:** Never commit `.env` or expose API keys in logs, screenshots, or source control.
-
-### 5. Run the research agent
-
+## Usage
 ```powershell
-python -u -m app.main "What are the latest applications of AI agents in healthcare?"
+python check_connections.py
+python -u -m app.main "Compare the top 3 open-source vector databases for RAG" --out sample_outputs/vector_dbs.json
+python -m pytest -v
+python -m evaluation.run_eval
+python -m evaluation.baseline "Compare the top 3 open-source vector databases for RAG"
 ```
 
-The agent displays progress updates and prints the structured research report as JSON.
+## Web UI (optional)
+A simple Streamlit front end calls the same agent code.
+```powershell
+python -m pip install -r requirements.txt
+python -m streamlit run streamlit_app.py.
+```
+Open http://localhost:8501, type a question (or click an example), and press **Run research**.
+The page shows live progress, the short answer, confidence, cited findings, sources, limitations, next steps,
+run details, and a JSON download button. Fallback reports are clearly flagged.
 
 ## Report Structure
+`user_question`, `short_answer`, `key_findings` (each with source URLs), `sources`, `confidence_level`,
+`limitations_or_assumptions`, `suggested_next_steps`, and `metadata` (run id, planner mode, searches, fetches,
+tool errors, fallback used, latency, tokens).
 
-The report contains:
+## Why an agentic approach?
+Research questions are open-ended. How many searches are needed, which entities to cover, and whether snippets are
+enough all depend on the question. A fixed pipeline cannot adapt. Here the planner chooses queries and tools, and the
+executor reacts to weak evidence by re-searching. I used one planner-executor loop on purpose: no multi-agent system
+or heavy framework, because the task does not need one and a simple loop is easier to test, trace, and explain.
 
-- `user_question`: The original research question
-- `short_answer`: A concise response
-- `key_findings`: Findings with associated source URLs
-- `sources`: Source titles, URLs, summaries, and source types
-- `confidence_level`: High, medium, or low
-- `limitations_or_assumptions`: Known limitations and assumptions
-- `suggested_next_steps`: Recommended follow-up actions
+## Tools and why
+- **web_search (Tavily):** returns relevance scores and clean snippets; fast, cheap discovery.
+- **web_fetch (Requests + Beautiful Soup):** full page text for depth. Blocks private/local addresses, re-validates every redirect hop, caps downloads at 1 MB.
 
-## Testing
+## How bad tool results are handled
+- Timeouts on every external call; retries with backoff only for 429/5xx/timeouts (never for 4xx).
+- Malformed search items are dropped; failed fetches keep the search snippet; PDFs and non-HTML are skipped.
+- Any tool error caps confidence at medium and adds a limitation.
+- Search fully down: clear error, no invented answer.
+- Invalid LLM JSON: one corrective retry, then a clearly labelled low-confidence fallback report.
 
-Run the automated test suite:
+## How hallucinations are reduced
+Evidence-only prompt, temperature 0, schema-constrained output, mandatory citations, citations checked against retrieved URLs
+(unsupported ones removed and reported), sources and `source_type` built in code, `user_question` never taken from the LLM,
+and confidence capped by rules (for example fewer than 2 independent domains forces low).
 
-```powershell
-python -m pytest -v
-```
+## Prompt injection
+Retrieved text is passed as data with an explicit instruction not to follow it. Instruction-like patterns are stripped before the
+LLM sees them, and URLs can only come from the retrieved set, so an injected "cite evil.com" cannot appear. Regex screening is a
+weak layer, not a guarantee.
 
-**Latest recorded result:** 21 tests passed.
+## Making it production-ready
+Async job queue and API endpoint; shared cache (Redis); rate limiting and auth; circuit breaker per provider; PDF and JS-page support;
+LLM-as-judge groundedness checks in CI; Langfuse/OpenTelemetry instead of JSONL; pin DNS results to close the DNS-rebinding window
+between URL validation and connection; secrets manager; regression evals on every prompt or model change.
 
-The tests cover input validation, research orchestration, report models, planner behavior, search-result normalization, webpage-fetch safety, and citation validation. External API behavior is primarily tested using mocks; passing tests do not guarantee that external services are always available.
+## What to monitor in production
+Latency p50/p95 per step; tokens and cost per run; fallback rate; tool error rate per provider; reformulation rate (search-quality proxy);
+share of claims removed by grounding; confidence distribution; injection-flag rate; user feedback.
+
+## Key trade-offs
+- Budgeted loop (max 4 searches, 4 fetches) instead of an open-ended agent: predictable cost and latency, less depth.
+- Rule-based source ranking: transparent and testable, but domain lists are hand-made and incomplete.
+- Fallback report instead of hard failure: always something useful, but lower quality.
+- Dropping bad citations instead of failing: better experience, but a claim can disappear (always disclosed in limitations).
+- Vague questions rejected by a simple word heuristic: cheap, but can miss or over-block edge cases.
 
 ## Evaluation
-
-The evaluation should include at least five research questions and failure scenarios. Record the expected behavior, observed behavior, evidence quality, citation validity, and whether the run completed successfully.
-
-Keep evaluation results in the `evaluation/` directory. Include actual observed results rather than assumed outcomes.
-
-## Reliability and Safety
-
-- Bounded search and fetch operations
-- Request timeouts and error handling in external tools
-- Structured output validation
-- Citation checks against collected evidence
-- URL validation to reduce unsafe webpage-fetching requests
-- Explicit limitations and reduced confidence when research steps fail
-- Fallback behavior for selected AI-provider failures
-
-These controls improve robustness but do not guarantee that every source is reliable or that every generated claim is correct. Sources should be independently verified before important decisions.
+See `evaluation/evaluation_report.md` for 7 queries with expected vs observed behaviour. Run `python -m evaluation.run_eval` to reproduce.
 
 ## Known Limitations
-
-- External AI and search services may be unavailable, rate-limited, or slow.
-- Some websites block automated fetching or return unsupported content.
-- Search snippets may provide incomplete context when full-page fetching fails.
-- Citation validation checks whether a URL was collected; it does not independently prove that a source supports the associated claim.
-- Fallback reports contain retrieved evidence snippets and are not equivalent to full AI synthesis.
-- Research quality depends on the relevance, accuracy, and diversity of retrieved sources.
+- Citation validation checks that a URL was retrieved, not that it semantically supports the claim.
+- Search quality depends on Tavily; some sites block fetching; PDFs and JavaScript pages are not read.
+- Fallback reports show raw snippets and can include text about unrelated entities (observed in Q5: figures for similarly named companies).
+- "Top N" requests can still return a different count if the model lists extras (seen once, fixed by a prompt rule).
+- Confidence rules are heuristic.
+- Regex injection screening is easy to evade.
 
 ## Future Improvements
-
-- Add retry policies with exponential backoff for transient API failures.
-- Improve webpage-fetch diagnostics and source diversity.
-- Add automated citation-to-claim support checks.
-- Expand evaluation across research domains and failure scenarios.
-- Measure latency, cost, and research quality.
-- Add caching and asynchronous tool execution where appropriate.
-- Compare agent performance against a non-agentic baseline.
-
-## License
-
-Add a license before distributing the project publicly if you intend to make its reuse terms explicit.
+Claim-to-source entailment checks; LLM-as-judge; shared cache; async API; PDF support; larger evaluation set; baseline comparison at scale.

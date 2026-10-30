@@ -1,7 +1,8 @@
+google-genai
 tavily-python
-pydantic
+pydantic>=2
 python-dotenv
 requests
 beautifulsoup4
 pytest
-google-genai
+streamlit

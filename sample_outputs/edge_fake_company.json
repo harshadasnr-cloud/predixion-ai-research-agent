@@ -1,0 +1,66 @@
+{
+  "user_question": "Research the quarterly revenue of Zzyzx Quantum Llamas Incorporated",
+  "short_answer": "A fallback report was created from retrieved evidence. Verify the cited sources before relying on it.",
+  "key_findings": [
+    {
+      "finding": "Information reported by Quantum Computing Inc. Reports First Quarter 2026 Financial Results: First quarter 2026 revenues totaled approximately $3.7 million compared to $39 thousand in the first quarter of 2025. The year-over-year increase was driven primarily by the acquisition of LSI in February 2026, and, to a lesser extent, NuCrypt in March 2026. [...] | Accounts payable | $ | 2,707 | $ | 778 |\n| Accrued expenses | 8,342 | 9,135 |\n| Deferred revenue | 1,882 | 395 |\n| Other current liabilities | 2,144 | 766 |\n| Total current liabilities | 15,075 | 11,074 |\n| Derivative liability | 4,5",
+      "source_urls": [
+        "https://www.prnewswire.com/news-releases/quantum-computing-inc-reports-first-quarter-2026-financial-results-302768603.html"
+      ]
+    },
+    {
+      "finding": "Information reported by Quantum Announces Preliminary Fiscal Fourth Quarter 2026 Financial Results Quantum Corporation (QMCO): Based on unaudited financials, the Company expects the following:\n\n Revenue of approximately $77.5 million, plus or minus $2 million, above the high-end of the guided range of $68 million, plus or minus $2 million\n GAAP operating expenses of approximately $30.5 million\n Cash of approximately $15.5 million\n\nQuantum expects to report its full results for the fiscal fourth quarter and full fiscal year of 2026 by mid-June 2026.\n\nAbout Quantum",
+      "source_urls": [
+        "https://investors.quantum.com/news-events/press-releases/detail/257/quantum-announces-preliminary-fiscal-fourth-quarter-2026"
+      ]
+    },
+    {
+      "finding": "Information reported by Quantum Computing Inc. Reports First Quarter 2026 Financial Results: First quarter 2026 revenues totaled approximately $3.7 million compared to $39 thousand in the first quarter of 2025. The year-over-year increase was driven primarily by the acquisition of LSI in February 2026, and, to a lesser extent, NuCrypt in March 2026. [...] | Accrued expenses |  |  | 8,342 |  |  |  | 9,135 |  |\n| Deferred revenue |  |  | 1,882 |  |  |  | 395 |  |\n| Other current liabilities |  |  | 2,144 |  |  |  | 766 |  |\n| Total current liabilities |  |  | 15,075 |  |  |  | 11,074 |  |",
+      "source_urls": [
+        "https://finance.yahoo.com/markets/stocks/articles/quantum-computing-inc-reports-first-200500357.html"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "Quantum Computing Inc. Reports First Quarter 2026 Financial Results",
+      "url": "https://www.prnewswire.com/news-releases/quantum-computing-inc-reports-first-quarter-2026-financial-results-302768603.html",
+      "summary": "First quarter 2026 revenues totaled approximately $3.7 million compared to $39 thousand in the first quarter of 2025. The year-over-year increase was driven primarily by the acquisition of LSI in February 2026, and, to a lesser extent, NuCrypt in March 2026. [...] | Accounts payable | $ | 2,707 | $ | 778 |\n| Accrued expenses | 8,342 | 9,135 |\n| Deferred revenue | 1,882 | 395 |\n| Other current liabilities | 2,144 | 766 |\n| Total current liabilities | 15,075 | 11,074 |\n| Derivative liability | 4,597 | 7,773 |\n| Operating lease liabilities | 3,678 | 1,808 |\n| Total liabilities | 23,350 | 20,655 |\n| Commitments and Contingencies (see Note 10) |\n| Stockholders' equity: | [...] | QUANTUM COMPUTING INC. |\n| Condensed Consolidated Statements of Operations and Comprehensive (Loss) Income |\n| (Unaud",
+      "source_type": "other"
+    },
+    {
+      "title": "Quantum Announces Preliminary Fiscal Fourth Quarter 2026 Financial Results Quantum Corporation (QMCO)",
+      "url": "https://investors.quantum.com/news-events/press-releases/detail/257/quantum-announces-preliminary-fiscal-fourth-quarter-2026",
+      "summary": "Based on unaudited financials, the Company expects the following:\n\n Revenue of approximately $77.5 million, plus or minus $2 million, above the high-end of the guided range of $68 million, plus or minus $2 million\n GAAP operating expenses of approximately $30.5 million\n Cash of approximately $15.5 million\n\nQuantum expects to report its full results for the fiscal fourth quarter and full fiscal year of 2026 by mid-June 2026.\n\nAbout Quantum",
+      "source_type": "other"
+    },
+    {
+      "title": "Quantum Computing Inc. Reports First Quarter 2026 Financial Results",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/quantum-computing-inc-reports-first-200500357.html",
+      "summary": "First quarter 2026 revenues totaled approximately $3.7 million compared to $39 thousand in the first quarter of 2025. The year-over-year increase was driven primarily by the acquisition of LSI in February 2026, and, to a lesser extent, NuCrypt in March 2026. [...] | Accrued expenses |  |  | 8,342 |  |  |  | 9,135 |  |\n| Deferred revenue |  |  | 1,882 |  |  |  | 395 |  |\n| Other current liabilities |  |  | 2,144 |  |  |  | 766 |  |\n| Total current liabilities |  |  | 15,075 |  |  |  | 11,074 |  |\n| Derivative liability |  |  | 4,597 |  |  |  | 7,773 |  |\n| Operating lease liabilities |  |  | 3,678 |  |  |  | 1,808 |  |\n| Total liabilities |  |  |  |  |  |  |  |  |\n| Commitments and Contingencies (see Note 10) |  |  |  |  |  |  |  |  | [...] | Research and development |  |  | 6,969 |  |  |  ",
+      "source_type": "other"
+    }
+  ],
+  "confidence_level": "low",
+  "limitations_or_assumptions": [
+    "LLM synthesis was unavailable (no finding cites a supplied source). This report lists retrieved snippets and is not a full synthesis."
+  ],
+  "suggested_next_steps": [
+    "Open and verify the cited sources.",
+    "Retry when the LLM provider is available."
+  ],
+  "metadata": {
+    "run_id": "9efab9d32a13",
+    "planner_mode": "llm",
+    "searches": 2,
+    "fetches_ok": 0,
+    "fetches_failed": 0,
+    "tool_errors": 0,
+    "reformulated": true,
+    "injection_flagged": 0,
+    "used_fallback": true,
+    "latency_s": 22.79,
+    "prompt_tokens": 1571,
+    "output_tokens": 89
+  }
+}
